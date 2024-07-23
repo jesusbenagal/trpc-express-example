@@ -14,7 +14,15 @@ export class AppRoutes {
         router: productsRouter,
         createContext: () => ({}),
         onError({ error }) {
-          logger.error(error.message)
+          if (error.cause?.name === 'ZodError') {
+            const errors = JSON.parse(error.cause.message).map((error: { path: string[]; message: string }) => ({
+              path: error.path.join(', '),
+              message: error.message
+            }))
+            logger.error(JSON.stringify(errors))
+          } else {
+            logger.error(error.message)
+          }
         }
       })
     )
