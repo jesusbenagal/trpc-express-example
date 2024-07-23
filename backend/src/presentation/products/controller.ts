@@ -1,61 +1,48 @@
-import { Request, Response } from 'express'
-import { CustomError, CreateProductDto, UpdateProductDto } from '../../domain'
 import { ProductService } from '../services'
+import { CustomError, CreateProductDto } from '../../domain'
 
 export class ProductController {
   constructor(public readonly productService: ProductService) {}
 
-  private handleError = (error: unknown, res: Response) => {
+  async getAll() {
+    try {
+      return await this.productService.getAll()
+    } catch (error) {
+      this.handleError(error)
+    }
+  }
+
+  async getById(input: { id: string }) {
+    const { id } = input
+    try {
+      return await this.productService.getById(id)
+    } catch (error) {
+      this.handleError(error)
+    }
+  }
+
+  async create(input: CreateProductDto) {
+    try {
+      return await this.productService.createProduct(input)
+    } catch (error) {
+      this.handleError(error)
+    }
+  }
+
+  async update(input: { id: string; data: Partial<CreateProductDto> }) {
+    const { id, data } = input
+
+    try {
+      return await this.productService.updateProduct(id, data)
+    } catch (error) {
+      this.handleError(error)
+    }
+  }
+
+  private handleError(error: unknown) {
     if (error instanceof CustomError) {
-      return res.status(error.statusCode).json({ error: error.message })
+      throw error
     }
-
-    CustomError.internalServer(`${error}`)
-    return res.status(500).json({ error: 'Internal server error' })
-  }
-
-  findAll = (req: Request, res: Response) => {
-    this.productService
-      .findAll()
-      .then((products) => res.json(products))
-      .catch((error) => this.handleError(error, res))
-  }
-
-  findById = (req: Request, res: Response) => {
-    const { id } = req.params
-
-    this.productService
-      .findOneById(id)
-      .then((product) => res.json(product))
-      .catch((error) => this.handleError(error, res))
-  }
-
-  create = (req: Request, res: Response) => {
-    const [error, createProductDto] = CreateProductDto.create(req.body)
-
-    if (error) {
-      CustomError.badRequest(error)
-      return res.status(400).json({ error })
-    }
-
-    this.productService
-      .createProduct(createProductDto!)
-      .then((product) => res.status(201).json(product))
-      .catch((error) => this.handleError(error, res))
-  }
-
-  update = (req: Request, res: Response) => {
-    const { id } = req.params
-    const [error, updateProductDto] = UpdateProductDto.create(req.body)
-
-    if (error) {
-      CustomError.badRequest(error)
-      return res.status(400).json({ error })
-    }
-
-    this.productService
-      .updateProduct(id, updateProductDto!)
-      .then((product) => res.json(product))
-      .catch((error) => this.handleError(error, res))
+    throw CustomError.internalServer(`${error}`)
   }
 }

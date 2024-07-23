@@ -1,9 +1,9 @@
 import { ProductModel } from '../../data'
-import { CustomError, ProductEntity, CreateProductDto, UpdateProductDto } from '../../domain'
+import { CustomError, ProductEntity, CreateProductDto } from '../../domain'
 import { Uuid } from '../../config'
 
 export class ProductService {
-  public async findAll(): Promise<ProductEntity[]> {
+  public async getAll(): Promise<ProductEntity[]> {
     const products = await ProductModel.find()
 
     const productsEntity = products.map((product) => ProductEntity.fromObject(product))
@@ -11,7 +11,7 @@ export class ProductService {
     return productsEntity
   }
 
-  public async findOneById(id: string): Promise<ProductEntity> {
+  public async getById(id: string): Promise<ProductEntity> {
     const product = await ProductModel.findOne({ id })
 
     if (!product) throw CustomError.notFound('Product not found')
@@ -37,7 +37,7 @@ export class ProductService {
     }
   }
 
-  public async updateProduct(id: string, updateProductDto: UpdateProductDto): Promise<ProductEntity> {
+  public async updateProduct(id: string, updateProductDto: Partial<CreateProductDto>): Promise<ProductEntity> {
     try {
       const product = await ProductModel.findOneAndUpdate({ id }, updateProductDto, { new: true })
 

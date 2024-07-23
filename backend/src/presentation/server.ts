@@ -34,7 +34,9 @@ export class Server {
     this.app.use(express.static(this.publicPath))
 
     // Routes
-    this.app.use(this.routes)
+    this.routes.forEach((route) => {
+      this.app.use(route)
+    })
 
     this.serverListener = this.app.listen(this.port, () => {
       this.logger.info(`Server listening on port ${this.port}`)

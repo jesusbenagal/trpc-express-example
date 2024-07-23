@@ -1,3 +1,5 @@
+import { createProductSchema } from '../../schemas/product.schema'
+
 export class CreateProductDto {
   private constructor(
     public readonly name: string,
@@ -7,18 +9,15 @@ export class CreateProductDto {
     public readonly description?: string
   ) {}
 
-  static create(object: { [key: string]: any }): [string?, CreateProductDto?] {
-    const { name, price, stock, active, description } = object
+  static create(object: unknown): [string?, CreateProductDto?] {
+    const parseResult = createProductSchema.safeParse(object)
 
-    if (!name) return ['Product name is required']
-    if (name && typeof name !== 'string') return ['Product name must be a string']
-    if (!price) return ['Product price is required']
-    if (price && typeof price !== 'number') return ['Product price must be a number']
-    if (!stock) return ['Product stock is required']
-    if (stock && typeof stock !== 'number') return ['Product stock must be a number']
-    if (active && typeof active !== 'boolean') return ['Product active must be a boolean']
-    if (description && typeof description !== 'string') return ['Product description must be a string']
+    if (!parseResult.success) {
+      const errors = parseResult.error.errors.map((err) => err.message).join(', ')
+      return [errors]
+    }
 
+    const { name, price, stock, active, description } = parseResult.data
     return [undefined, new CreateProductDto(name, price, stock, active, description)]
   }
 }

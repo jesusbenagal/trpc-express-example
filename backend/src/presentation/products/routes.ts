@@ -1,20 +1,25 @@
-import { Router } from 'express'
-import { ProductService } from '../services'
+// src/infrastructure/trpc/products/routes.ts
+import { initTRPC } from '@trpc/server'
+import { z } from 'zod'
 import { ProductController } from './controller'
+import { ProductService } from '../services'
+import { createProductSchema } from '../../domain/'
 
-export class ProductRoutes {
-  static get routes(): Router {
-    const router = Router()
+const t = initTRPC.create()
+const productController = new ProductController(new ProductService())
 
-    const productService = new ProductService()
+export const productsRouter = t.router({
+  getAll: t.procedure.query(() => productController.getAll()),
+  getById: t.procedure.input(z.object({ id: z.string() })).query(({ input }) => productController.getById(input)),
+  createProduct: t.procedure.input(createProductSchema).mutation(({ input }) => productController.create(input)),
+  updateProduct: t.procedure
+    .input(
+      z.object({
+        id: z.string(),
+        data: createProductSchema.partial()
+      })
+    )
+    .mutation(({ input }) => productController.update(input))
+})
 
-    const controller = new ProductController(productService)
-
-    router.get('/', controller.findAll)
-    router.get('/:id', controller.findById)
-    router.post('/', controller.create)
-    router.put('/:id', controller.update)
-
-    return router
-  }
-}
+export type ProductsRouter = typeof productsRouter
