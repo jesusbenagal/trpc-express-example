@@ -13,7 +13,7 @@ export class AppRoutes {
       createExpressMiddleware({
         router: productsRouter,
         createContext: () => ({}),
-        onError({ error }) {
+        onError: ({ error }) => {
           if (error.cause?.name === 'ZodError') {
             const errors = JSON.parse(error.cause.message).map((error: { path: string[]; message: string }) => ({
               path: error.path.join(', '),

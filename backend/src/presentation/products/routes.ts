@@ -1,4 +1,3 @@
-// src/infrastructure/trpc/products/routes.ts
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
 import { ProductController } from './controller'

@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "packages/*"
+  ],
   "scripts": {
     "start:backend": "pnpm --filter backend run start",
     "build:backend": "pnpm --filter backend run build",
     "dev:backend": "pnpm --filter backend run dev",
-    "create:database": "pnpm --filter backend run create:database"
+    "create:database": "pnpm --filter backend run create:database",
+    "build:packages": "pnpm run -r --filter './packages/**' build"
   },
   "keywords": [],
   "author": "",
